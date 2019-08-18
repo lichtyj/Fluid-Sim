@@ -3,6 +3,7 @@ var interactionDist = 16;
 class Player extends Entity {
     constructor(position) {
         super(position, 8, "blue");
+        this.temp = 0;
     }
 
     static create(position) {
@@ -13,7 +14,11 @@ class Player extends Entity {
     }
 
     move(direction) {
-        this.acceleration.add(direction.mult(0.25));
+        if (this.onGround()) {
+            this.acceleration.add(direction.mult(0.25));
+        } else {
+            this.acceleration.add(direction.mult(0.125));
+        }
     }
 
     jump() {
@@ -21,16 +26,7 @@ class Player extends Entity {
     }
 
     boom() {
-        var v;
-        this.destroy();
-        for (var i = 0; i < 32; i++) {
-            v = Vector.randomMinMax(1,2);
-            v.x *= 4;
-            if (v.y > 0) v.y *= -1;
-            game.environment.addVelocity(this.position.x + v.x, this.position.y + v.y, v);
-            game.environment.addDensity(this.position.x + v.x, this.position.y + v.y, 10);
-            Particle.create(this.position.add(v), v.mult(0.025), Math.random()*5 + 5);
-        }
+        this.temp = 10;
     }
 
     update() {
@@ -38,6 +34,20 @@ class Player extends Entity {
         if (this.outsideWorld()) {
             this.destroy();
         }
+
+        if (this.temp > 0) {
+            var v;
+            this.temp--;
+            // for (var i = 0; i < 32; i++) {
+                v = Vector.randomMinMax(0,0);
+                v.x *= 4;
+                if (v.y > 0) v.y *= -1;
+                game.environment.addVelocity(this.position.x + v.x, this.position.y + v.y, v);
+                game.environment.addDensity(this.position.x + v.x, this.position.y + v.y + 10, -10);
+                Particle.create(this.position.add(v), v.mult(0.025), Math.random()*5 + 5);
+            // }
+        }
+
     }
 
     outsideWorld() {

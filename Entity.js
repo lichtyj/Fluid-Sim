@@ -22,10 +22,10 @@ class Entity {
     update() {
         this.acceleration.add(this.gravity);
         this.velocity.add(this.acceleration);
-        if (Math.abs(this.velocity.x) > this.maxSpeed) this.velocity.x = Math.sin(this.velocity.x)*this.maxSpeed;
+        if (Math.abs(this.velocity.x) > this.maxSpeed) this.velocity.x = Math.sign(this.velocity.x)*this.maxSpeed;
         // this.velocity.limit(this.maxSpeed);
         // game.wind(this.position, this.velocity, this.width);
-        this.velocity.add(game.environment.getVector(this.position).mult(1/this.width));
+        // this.velocity.add(game.environment.getVector(this.position).mult(1/this.width));
         for (var y = 0; y < this.velocity.y; y++) {
             if (game.environment.isWall(this.position.x, this.position.y+this.width/2+y)) {
                 this.velocity.y = 0;
