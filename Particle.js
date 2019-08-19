@@ -1,13 +1,13 @@
 var interactionDist = 16;
 
 class Particle extends Entity {
-    constructor(position, temp) {
-        super(position, 1, "red");
+    constructor(position, temp, mass) {
+        super(position, 1, "red", mass);
         this.temp = temp;
     }
 
     static create(position, velocity, temp) {
-        let obj = new Particle(position, temp);
+        let obj = new Particle(position, temp, Math.random(16)+4);
         obj.gravity = Vector.down().mult(0.25);
         obj.velocity = velocity;
         game.addEntity(obj);

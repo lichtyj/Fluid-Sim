@@ -128,6 +128,7 @@ class Controls {
                     moving.add(Vector.down());
                     break;
                 case 87: // W
+                    this.keyUp(key);
                     game.player.jump();
                     break;
                 case 118: // F7

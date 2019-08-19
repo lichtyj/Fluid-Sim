@@ -51,10 +51,11 @@ class GameEngine {
         window.requestAnimationFrame(game.gameLoop);
     }
 
-    wind(pos, vel, mass) {
-        for (var i = -mass/2+1; i < mass/2-1; i++) {
-            for (var j = -mass/2+1; j < mass/2-1; j++) {
-                this.environment.addVelocity(pos.x+i,pos.y+j, vel.x/8, vel.y/8);
+    wind(pos, vel, size, mass) {
+        if (size > 4) size -= 2;
+        for (var i = -size/2; i < size/2; i++) {
+            for (var j = -size/2; j < size/2; j++) {
+                this.environment.addVelocity(pos.x+i,pos.y+j, vel.x/8*mass, vel.y/8*mass);
             }
         }
     }
