@@ -18,18 +18,6 @@ class Explosion extends Entity {
             game.remove(this);
         }
         this.temp -= 0.1;
-        this.color = "rgb(" + this.temp*50 + ", " + this.temp*25 + ",0)";
 
-        if (this.outsideWorld()) {
-            this.destroy();
-        }
-    }
-
-    outsideWorld() {
-        return (this.position.x < interactionDist || this.position.x > worldSize - interactionDist) || (this.position.y < interactionDist || this.position.y > worldSize - interactionDist);
-    }
-
-    draw(ctx) {
-        super.draw(ctx);
     }
 }
