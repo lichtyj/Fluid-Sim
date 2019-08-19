@@ -2,13 +2,13 @@ var interactionDist = 16;
 
 class Particle extends Entity {
     constructor(position, temp, mass) {
-        super(position, 1, "red", mass);
+        super(position, 1, 1, "red", mass);
         this.temp = temp;
     }
 
     static create(position, velocity, temp) {
-        let obj = new Particle(position, temp, Math.random(16)+4);
-        obj.gravity = Vector.down().mult(0.25);
+        let obj = new Particle(position, temp, Math.random(16)+8);
+        obj.gravity = Vector.down().mult(0.125);
         obj.velocity = velocity;
         game.addEntity(obj);
         return obj;
@@ -19,8 +19,9 @@ class Particle extends Entity {
         if (this.temp <= 0) {
             game.remove(this);
         }
-        this.temp -= 0.1;
-        this.color = "rgb(" + this.temp*50 + ", " + this.temp*25 + ",0)";
+        this.temp -= 1;
+        if (this.mass > 8) this.mass -= 1;
+        this.color = "rgb(" + this.temp*100 + ", " + this.temp*50 + ",0)";
 
         if (this.outsideWorld()) {
             this.destroy();

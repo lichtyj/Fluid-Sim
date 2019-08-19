@@ -130,17 +130,18 @@ class Environment {
     }
 
     update(dt) {
-        this.diffuse(this.vx0, this.vx, this.visc, dt, this.velBounce);
-        this.diffuse(this.vy0, this.vy, this.visc, dt, this.velBounce);
-        this.diffuse(this.s, this.density, this.diff, dt, this.denBounce);
+        this.vx0 = [...this.vx];
+        this.vy0 = [...this.vy];
+        this.s = [...this.density];
+        // Got rid of diffusion for a significant performance boost 
 
         this.project(this.vx0, this.vy0, this.vx, this.vy, this.velBounce);
         
-        this.advect(this.vx, this.vx0, this.vx0, this.vy0, dt, 0.98, this.velBounce);    
-        this.advect(this.vy, this.vy0, this.vx0, this.vy0, dt, 0.98, this.velBounce);
+        this.advect(this.vx, this.vx0, this.vx0, this.vy0, dt, 0.9, this.velBounce);    
+        this.advect(this.vy, this.vy0, this.vx0, this.vy0, dt, 0.9, this.velBounce);
         
         this.project(this.vx, this.vy, this.vx0, this.vy0, this.velBounce);
-        this.advect(this.density, this.s, this.vx, this.vy, dt, 0.95, this.denBounce);
+        this.advect(this.density, this.s, this.vx, this.vy, dt, 0.85, this.denBounce);
     }
 
     addPos(arr, x, y, dx, dy, bounce) {
@@ -150,7 +151,7 @@ class Environment {
             ret = arr[this.ix(x+dx,y+dy)]
         else {
             if (bounce < 0) {
-                bounce *= 1.25*this.density[this.ix(x,y)];
+                bounce *= 1*this.density[this.ix(x,y)];
             } else {
                 bounce *= 2*(new Vector(this.vx[this.ix(x,y)], this.vy[this.ix(x,y)]).magnitude());
             }
@@ -159,21 +160,13 @@ class Environment {
         return ret;
     }
 
-    diffuse(x, x0, diff, dt, bounce) {
-        let a = dt * diff * (this.size - 2) * (this.size - 2);
-        let aRecip = 1.0 / 1 + 4 * a;
-        let i,j;
-        for (j = 1; j < this.size - 1; j++) {
-            for (i = 1; i < this.size - 1; i++) {
-                if (this.wall[this.ix(i,j)] == 0) {
-                    x[this.ix(i,j)] = 
-                        (x0[this.ix(i,j)]
-                        + a * (this.addPos(x, i, j, 1,0, bounce)
-                             + this.addPos(x, i, j,-1,0, bounce)
-                             + this.addPos(x, i, j,0,1, bounce)
-                             + this.addPos(x, i, j,0,-1, bounce))
-                        ) * aRecip;
-                }
+    diffuse(x, x0) {
+        let size = this.size * this.size;
+        for (var j = 0; j < size; j++) {
+            if (this.wall[j] == 0) {
+                x[j] = x0[j];
+            } else {
+                x[j] = 0;
             }
         }
     }

@@ -21,7 +21,9 @@ class GameEngine {
     init() {
         this.ui.pushMessage("BUILDING WORLD...", "#FFF");
         window.setTimeout(this.gameLoop, 10);
-        this.environment = new Environment(128, 0.00000000000001, 0.00000000001);
+        // this.environment = new Environment(128, 0.00000000000001, 0.00000000001);
+        // this.environment = new Environment(128, 0.00001, 0.00001);
+        this.environment = new Environment(128, 0, 0.00000);
         LoadLevel01();
     }
 
@@ -51,10 +53,13 @@ class GameEngine {
         window.requestAnimationFrame(game.gameLoop);
     }
 
-    wind(pos, vel, size, mass) {
-        if (size > 4) size -= 2;
-        for (var i = -size/2; i < size/2; i++) {
-            for (var j = -size/2; j < size/2; j++) {
+    wind(pos, vel, width, height, mass) {
+        if (width > 4) width -= 2;
+        if (height > 4) height -= 2;
+        width -= width/2;
+        height -= height/2;
+        for (var i = -width; i < width; i++) {
+            for (var j = -height; j < height; j++) {
                 this.environment.addVelocity(pos.x+i,pos.y+j, vel.x/8*mass, vel.y/8*mass);
             }
         }

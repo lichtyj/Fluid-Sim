@@ -1,6 +1,7 @@
 class Controls {
     constructor() {
         this.keys = [];
+        this.idleKeys = [];
         this.lmb = 0;
         this.mouseX = 0;
         this.mouseY = 0;
@@ -26,8 +27,8 @@ class Controls {
             that.mouseButton(e, true) });
         this.doc.addEventListener("mousemove", function(e) {
             that.mouseMove(e) });
-        this.doc.addEventListener("wheel", function(e) {
-            that.mouseWheel(Math.sign(e.deltaY)) });
+        // this.doc.addEventListener("wheel", function(e) {
+        //     that.mouseWheel(Math.sign(e.deltaY)) });
     }
 
     // focus() {
@@ -41,12 +42,19 @@ class Controls {
     // }
 
     keyUp(num) {
-        delete this.keys.splice(this.keys.indexOf(num),1);
+        if (this.keys.indexOf(num) != -1) delete this.keys.splice(this.keys.indexOf(num),1);
+        if (this.idleKeys.indexOf(num) != -1) delete this.idleKeys.splice(this.idleKeys.indexOf(num),1);
+    }
+
+    keyIdle(num) {
+        if (this.idleKeys.indexOf(num) == -1) {
+            this.idleKeys.push(num);
+        }
     }
 
     keyDown(num) {
-        if (this.keys.indexOf(num) == -1) {
-            // console.log(num);
+        if (this.keys.indexOf(num) == -1 && this.idleKeys.indexOf(num) == -1) {
+            console.log(num);
             this.keys.push(num);
         }
     }
@@ -95,10 +103,10 @@ class Controls {
         var moving = Vector.zero();
         for (var key of this.keys) {
             switch(key) {
-                case 65: // A
+                case 65: case 37: // A
                     moving.add(Vector.left());
                     break;
-                case 68: // D
+                case 68: case 39: // D
                     moving.add(Vector.right());
                     break;
                 case 69: // E
@@ -121,27 +129,29 @@ class Controls {
                     game.addWall(this.mouseX, this.mouseY);
                     break;
                 case 82: // R
-                    game.selectRandomNpc();
+                    // game.selectRandomNpc();
                     this.keyUp(key);
                     break;
                 case 83: // S
                     moving.add(Vector.down());
                     break;
-                case 87: // W
-                    this.keyUp(key);
+                case 87: case 38: // W
                     game.player.jump();
+                    this.keyUp(key);
+                    this.keyIdle(key);
                     break;
                 case 118: // F7
-                    game.save();
+                    // game.save();
                     this.keyUp(key);
                     break;
                 case 120: // F9
-                    game.load();
+                    // game.load();
                     this.keyUp(key);
                     break;
                 case "lmb":
                     // game.shoot(this.mouseX, this.mouseY, this.mouseX - this.mouseLastX, this.mouseY - this.mouseLastY);
                     // this.keyUp(key);
+                    console.log(this.mouseX + ", " + this.mouseY);
                     break;
             }
         }
