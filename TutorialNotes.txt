@@ -1,0 +1,4 @@
+Tap space to jump
+
+Hold space to jump higher
+

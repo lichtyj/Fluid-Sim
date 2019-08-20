@@ -23,7 +23,8 @@ class GameEngine {
         window.setTimeout(this.gameLoop, 10);
         // this.environment = new Environment(128, 0.00000000000001, 0.00000000001);
         // this.environment = new Environment(128, 0.00001, 0.00001);
-        this.environment = new Environment(128, 0, 0.00000);
+        // this.environment = new Environment(128, 0, 0);
+        this.environment = new Environment(64, 0, 0);
         LoadLevel01();
     }
 
@@ -60,7 +61,7 @@ class GameEngine {
         height -= height/2;
         for (var i = -width; i < width; i++) {
             for (var j = -height; j < height; j++) {
-                this.environment.addVelocity(pos.x+i,pos.y+j, vel.x/8*mass, vel.y/8*mass);
+                this.environment.addVelocity(pos.x+i,pos.y+j, vel.x/32*mass, vel.y/32*mass);
             }
         }
     }
@@ -73,7 +74,7 @@ class GameEngine {
         }
         while (this.toRemove.length > 0) {
             var rem = this.toRemove.pop();
-            this.entities.splice(this.entities.indexOf(rem),1);
+            if (this.entities.indexOf(rem) !== -1) this.entities.splice(this.entities.indexOf(rem),1);
         }
     }
 

@@ -1,5 +1,5 @@
 class Vector { // Ignores z in all non-elementary calcs
-    constructor(x, y, z) {
+    constructor(x, y) {
         if (arguments.length == 0) {
             this.x = 0;
             this.y = 0;
@@ -160,8 +160,9 @@ class Vector { // Ignores z in all non-elementary calcs
         return new Vector(0, 1);
     }
 
-    static fromAngle(angle) {
-        return new Vector(Math.cos(angle), Math.sin(angle), 0);
+    static fromAngle(angle, magnitude) {
+        if (magnitude === undefined) magnitude = 1;
+        return (new Vector(Math.cos(angle), Math.sin(angle))).mult(magnitude);
     }
 
     static create(x,y) {

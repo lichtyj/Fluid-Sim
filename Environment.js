@@ -48,7 +48,11 @@ class Environment {
         let x, y, r, g, b, v, d;
         for (x = 0; x < this.size; x++) {
             for (y = 0; y < this.size; y++) {
-                if (this.wall[this.ix(x,y)]) {
+                if (this.wall[this.ix(x,y)] === 1) {
+                    r = 128;
+                    g = 128;
+                    b = 128;
+                } else if (this.wall[this.ix(x,y)] === 2) {
                     r = 255;
                     g = 255;
                     b = 255;
@@ -116,11 +120,11 @@ class Environment {
     }
 
     isWall(x,y) {
-        return (this.wall[this.worldToGrid(x,y)] !== 0);
+        return this.wall[this.worldToGrid(x,y)];
     }
 
-    addWall(x,y) {
-        this.wall[this.worldToGrid(x,y)] = 1;
+    addWall(x,y, type) {
+        this.wall[this.worldToGrid(x,y)] = type;
         this.density[this.worldToGrid(x,y)] = 0;
         this.s[this.worldToGrid(x,y)] = 0;
         this.vx[this.worldToGrid(x,y)] = 0;
@@ -137,11 +141,11 @@ class Environment {
 
         this.project(this.vx0, this.vy0, this.vx, this.vy, this.velBounce);
         
-        this.advect(this.vx, this.vx0, this.vx0, this.vy0, dt, 0.9, this.velBounce);    
-        this.advect(this.vy, this.vy0, this.vx0, this.vy0, dt, 0.9, this.velBounce);
+        this.advect(this.vx, this.vx0, this.vx0, this.vy0, dt, 0.9999, this.velBounce);    
+        this.advect(this.vy, this.vy0, this.vx0, this.vy0, dt, 0.9999, this.velBounce);
         
         this.project(this.vx, this.vy, this.vx0, this.vy0, this.velBounce);
-        this.advect(this.density, this.s, this.vx, this.vy, dt, 0.85, this.denBounce);
+        this.advect(this.density, this.s, this.vx, this.vy, dt, 0.965, this.denBounce);
     }
 
     addPos(arr, x, y, dx, dy, bounce) {
@@ -151,26 +155,15 @@ class Environment {
             ret = arr[this.ix(x+dx,y+dy)]
         else {
             if (bounce < 0) {
-                bounce *= 1*this.density[this.ix(x,y)];
+                bounce *= this.density[this.ix(x,y)];
             } else {
-                bounce *= 2*(new Vector(this.vx[this.ix(x,y)], this.vy[this.ix(x,y)]).magnitude());
+                bounce *= new Vector(this.vx[this.ix(x,y)], this.vy[this.ix(x,y)]).magnitude();
             }
             ret = bounce*arr[this.ix(x,y)];
         }
         return ret;
     }
-
-    diffuse(x, x0) {
-        let size = this.size * this.size;
-        for (var j = 0; j < size; j++) {
-            if (this.wall[j] == 0) {
-                x[j] = x0[j];
-            } else {
-                x[j] = 0;
-            }
-        }
-    }
-
+    
     project(veloX, veloY, p, div, bounce) {
         let j,i;
         let d1, d2;

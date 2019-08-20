@@ -65,7 +65,7 @@ class Controls {
 
     keyDown(num) {
         if (this.keys.indexOf(num) == -1 && this.idleKeys.indexOf(num) == -1) {
-            // console.log(num);
+            console.log(num);
             this.keys.push(num);
         }
     }
@@ -115,10 +115,10 @@ class Controls {
         for (var key of this.keys) {
             switch(key) {
                 case 65: case 37: // A
-                    moving.add(Vector.left());
+                    moving.add(Vector.left().mult(0.75));
                     break;
                 case 68: case 39: // D
-                    moving.add(Vector.right());
+                    moving.add(Vector.right().mult(0.75));
                     break;
                 case 69: // E
                     game.player.boom();
@@ -137,14 +137,20 @@ class Controls {
                     this.keyUp(key);
                     break;
                 case 81: // Q
-                    game.addWall(this.mouseX, this.mouseY);
+                    // game.addWall(this.mouseX, this.mouseY);
+                    console.log(game.player.position.x + ", " + game.player.position.y);
+                    game.player.onFire = !game.player.onFire;
+                    this.keyUp(key);
                     break;
                 case 82: // R
                     // game.selectRandomNpc();
                     this.keyUp(key);
                     break;
-                case 83: // S
-                    moving.add(Vector.down());
+                case 83: case 40: // S
+                    game.player.isDropping = true;
+                    setTimeout(() => {game.player.isDropping = false}, 200);
+                    this.keyUp(key);
+                    this.keyIdle(key);
                     break;
                 case 87: case 38: // W
                     game.player.jump();
@@ -160,8 +166,8 @@ class Controls {
                     this.keyUp(key);
                     break;
                 case "lmb":
-                    // game.shoot(this.mouseX, this.mouseY, this.mouseX - this.mouseLastX, this.mouseY - this.mouseLastY);
-                    // this.keyUp(key);
+                    game.player.shoot(new Vector(this.mouseX, this.mouseY));
+                    this.keyUp(key);
                     // console.log(this.mouseX + ", " + this.mouseY);
                     break;
             }

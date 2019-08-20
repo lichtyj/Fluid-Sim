@@ -1,5 +1,3 @@
-var interactionDist = 16;
-
 class Person extends Entity {
     constructor(position) {
         super(position, 1, "red");

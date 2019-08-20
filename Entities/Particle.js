@@ -1,5 +1,3 @@
-var interactionDist = 16;
-
 class Particle extends Entity {
     constructor(position, temp, mass) {
         super(position, 1, 1, "red", mass);

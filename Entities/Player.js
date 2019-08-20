@@ -1,5 +1,3 @@
-var interactionDist = 2;
-
 class Player extends Entity {
     constructor(position) {
         super(position, 4, 8, "blue", 1);
@@ -11,11 +9,12 @@ class Player extends Entity {
 
         this.moving = false;
         this.jumping = false;
+        this.onFire = false;
     }
 
     static create(position) {
         let obj = new Player(position);
-        obj.gravity = Vector.down().mult(0.125);
+        obj.gravity = Vector.down().mult(0.25);
         game.addEntity(obj);
         return obj;
     }
@@ -53,10 +52,20 @@ class Player extends Entity {
         // this.acceleration.add(Vector.up().mult(1));
     }
 
+    shoot(target) {
+        var angle = this.position.angleTo(target);
+        Projectile.create(this.position.clone(), Vector.fromAngle(angle, 10));
+    }
+
+    onImpact() {
+        
+    }
+
     update() {
+        if (Math.abs(this.velocity.x) > this.maxSpeed) this.velocity.x = Math.sign(this.velocity.x)*this.maxSpeed;
         super.update();
         if (this.outsideWorld()) {
-            game.player = Player.create(new Vector(64,16));
+            setTimeout(() => {game.player = Player.create(new Vector(64,16))}, 500);
             this.destroy();
         }
 
@@ -71,20 +80,33 @@ class Player extends Entity {
             this.coyoteTime = -1;
         }
 
-        if (this.fire > 0) {
+        if (this.onFire) this.fire += 1;
+        if (this.fire > 1) {
             var v;
-            this.fire--;
-            for (var i = 0; i < 4; i++) {
+            this.fire /= 2;
+            for (var i = 0; i < 8; i++) {
                 v = Vector.randomMinMax(1,4);
-                v.y*=1.5;
-                v.y-=4+this.velocity.y;
-                game.environment.addVelocity(this.position.x + v.x, this.position.y + this.height/2 + v.y, v.mult(15));
-                v.mult(0.05);
-                game.environment.addDensity(this.position.x + v.x, this.position.y + this.height/2 + v.y, 16);
+                v.subtract(this.velocity);
+                // v.y*=1.5;
+                if (this.onFire) v.y-=1;
+                v.mult(this.fire/10);
+                game.environment.addVelocity(this.position.x + v.x    , this.position.y + this.height/2 + v.y - 4    , v);
+                // game.environment.addVelocity(this.position.x + v.x + 1, this.position.y + this.height/2 + v.y    , v);
+                // game.environment.addVelocity(this.position.x + v.x - 1, this.position.y + this.height/2 + v.y    , v);
+                // game.environment.addVelocity(this.position.x + v.x    , this.position.y + this.height/2 + v.y + 1, v);
+                // game.environment.addVelocity(this.position.x + v.x    , this.position.y + this.height/2 + v.y - 1, v);
+                game.environment.addVelocity(this.position.x + v.x + 2, this.position.y + this.height/2 + v.y - 4    , v);
+                game.environment.addVelocity(this.position.x + v.x - 2, this.position.y + this.height/2 + v.y - 4    , v);
+                game.environment.addVelocity(this.position.x + v.x    , this.position.y + this.height/2 + v.y - 4 + 2, v);
+                game.environment.addVelocity(this.position.x + v.x    , this.position.y + this.height/2 + v.y - 4 - 2, v);
+                
+                game.environment.addDensity(this.position.x + v.x, this.position.y + this.height/2 + v.y - 4, this.onFire);
             }
-            // v.y -= 4;
-            // v.x *= 2;
-            Particle.create((this.position.clone()).add(v), v, Math.random()*10);
+            // // v.x *= 2;
+            // v.mult(5);
+            // v.y -= Math.random()*2+2;
+            // v.x *= Math.random()*2+1;
+            // Particle.create((this.position.clone()).add(v), v, Math.random()*5+12);
         }
     }
 
@@ -93,11 +115,11 @@ class Player extends Entity {
     }
 
     draw(ctx) {
-        ctx.fillStyle = (this.coyoteTime > 0) ? "red" : this.color;
+        ctx.fillStyle = (this.isDropping) ? "green" : (this.coyoteTime > 0) ? "red" : this.color;;
         // if (this.velocity.magnitude() > 0.75) {
         // ctx.fillStyle = "white";
         var offset = Math.min(this.velocity.y, this.maxSpeed);
         // var offset = 0;
-        ctx.fillRect(this.position.x - (this.width - offset)/2, this.position.y - (this.height/2 + offset), this.width - offset, this.height + offset);
+        ctx.fillRect((this.position.x - (this.width - offset)/2) | 0, (this.position.y - (this.height/2 + offset)) | 0, (this.width - offset) | 0, (this.height + offset) | 0);
     }
 }
