@@ -1,13 +1,16 @@
-var interactionDist = 4;
+var interactionDist = 2;
 
 class Player extends Entity {
     constructor(position) {
-        super(position, 8, 16, "blue", 1);
+        super(position, 4, 8, "blue", 1);
         this.canJump = 1;
         this.maxJumps = 2;
         this.maxCoyoteTime = 8;
         this.fire = 0;
         this.coyoteTime = 0;
+
+        this.moving = false;
+        this.jumping = false;
     }
 
     static create(position) {
@@ -21,8 +24,14 @@ class Player extends Entity {
         if (this.onGround()) {
             this.acceleration.add(direction.mult(0.25));    
         } else {
-            this.acceleration.add(direction.mult(0.125));
+            this.acceleration.add(direction.mult(0.25));
         }
+        this.moving = true;
+    }
+
+    stop(direction) {
+        if (Math.sign(direction.x) === Math.sign(this.velocity.x)) this.velocity.x /= 4;
+        this.moving = false;
     }
 
     jump() {
@@ -30,7 +39,13 @@ class Player extends Entity {
             this.acceleration.add(Vector.up().mult(5));
             if (this.canJump < this.maxJumps) this.boom();
             this.canJump--;
+            this.jumping = true;
         }
+    }
+
+    stopJump() {
+        if (this.velocity.y < 0) this.velocity.y /= 2;
+        this.jumping = false;
     }
 
     boom() {

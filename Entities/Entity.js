@@ -4,14 +4,14 @@ class Entity {
         this.velocity = Vector.zero();
         this.acceleration = Vector.zero();
 
-        this.maxSpeed = 4;
+        this.maxSpeed = 1.5;
         this.width = width;
         this.height = height;
         this.color = color;
         this.mass = mass;
 
         this.airRes = 0.9;
-        this.groundRes = 0.4;
+        this.groundRes = 0.7;
 
         this.gravity = Vector.zero();
     }
@@ -34,19 +34,27 @@ class Entity {
         for (var x = 0; x < this.width; x++) {
             for (var y = 0; sign*y < sign*this.velocity.y; y += sign) {
                 if (game.environment.isWall(this.position.x - this.width/2 + x, this.position.y+sign*this.height/2+y)) {
-                    this.velocity.y = -this.velocity.y*this.groundRes;
+                    this.velocity.y = -this.velocity.y*0.4;
                     this.position.y += y*sign;
                 }
             }
         }
-
-        sign = Math.sign(this.velocity.x);
-        // Horizontal
+        // // Left
         for (var y = 0; y < this.height; y++) {
-            for (var x = 0; sign*x < sign*this.velocity.x; x += sign) {
-                if (game.environment.isWall(this.position.x + sign*this.width/2 + x, this.position.y-this.height/2+y)) {
-                    this.velocity.x = -this.velocity.x*this.groundRes;
-                    this.position.x += x*sign;
+            for (var x = 0; x > this.velocity.x; x--) {
+                if (game.environment.isWall(this.position.x - this.width/2 - x - 1, this.position.y-this.height/2+y)) {
+                    this.velocity.x = -this.velocity.x*0.8;
+                    this.position.x -= x;
+                }
+            }
+        }
+
+        // Right
+        for (var y = 0; y < this.height; y++) {
+            for (var x = 0; x < this.velocity.x; x++) {
+                if (game.environment.isWall(this.position.x + this.width/2 + x, this.position.y-this.height/2+y)) {
+                    this.velocity.x = -this.velocity.x*0.8;
+                    this.position.x += x;
                 }
             }
         }

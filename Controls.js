@@ -42,6 +42,17 @@ class Controls {
     // }
 
     keyUp(num) {
+        switch(num) {
+            case 65: case 37: // A
+                game.player.stop(Vector.left());
+            break;
+            case 68: case 39: // D
+                game.player.stop(Vector.right());
+                break;
+            case 87: case 38: // W\
+                game.player.stopJump();
+            break;
+        }
         if (this.keys.indexOf(num) != -1) delete this.keys.splice(this.keys.indexOf(num),1);
         if (this.idleKeys.indexOf(num) != -1) delete this.idleKeys.splice(this.idleKeys.indexOf(num),1);
     }
@@ -54,7 +65,7 @@ class Controls {
 
     keyDown(num) {
         if (this.keys.indexOf(num) == -1 && this.idleKeys.indexOf(num) == -1) {
-            console.log(num);
+            // console.log(num);
             this.keys.push(num);
         }
     }
@@ -151,7 +162,7 @@ class Controls {
                 case "lmb":
                     // game.shoot(this.mouseX, this.mouseY, this.mouseX - this.mouseLastX, this.mouseY - this.mouseLastY);
                     // this.keyUp(key);
-                    console.log(this.mouseX + ", " + this.mouseY);
+                    // console.log(this.mouseX + ", " + this.mouseY);
                     break;
             }
         }

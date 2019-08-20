@@ -7,7 +7,7 @@ function LoadLevel01() {
         // Tree.create(getRandomVector(worldSize));
         // Person.create(getRandomVector(worldSize))
         // game.environment.addDensity(Math.random()*worldSize,Math.random()*worldSize, 1);
-    game.player = Player.create(new Vector(32,32));
+    game.player = Player.create(new Vector(64,96));
 }
 
 function drawLine(sx, sy, ex, ey) {
