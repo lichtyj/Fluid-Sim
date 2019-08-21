@@ -54,7 +54,23 @@ class Player extends Entity {
 
     shoot(target) {
         var angle = this.position.angleTo(target);
-        Projectile.create(this.position.clone(), Vector.fromAngle(angle, 10));
+        var dir = Vector.fromAngle(angle, 10);
+        game.environment.addDensity(this.position.x + dir.x * 0.6, this.position.y - this.height/2 + dir.y * 0.6, 50);
+        game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.4, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.4, dir);
+        // game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.6, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.6, dir);
+        // game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.8, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.8, dir);
+
+        angle += 10;
+        game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.4, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.4, dir);
+        // game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.6, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.6, dir);
+        // game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.8, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.8, dir);
+
+        angle -= 20;
+        game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.4, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.4, dir);
+        // game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.6, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.6, dir);
+        // game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.8, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.8, dir);
+        // dir.mult(2);
+        Projectile.create(this.position.clone(), dir);
     }
 
     onImpact() {

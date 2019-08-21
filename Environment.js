@@ -20,30 +20,6 @@ class Environment {
         this.drawFire(ctx);
     }
 
-    drawD(ctx) {
-        let x, y, color;
-        for (x = 0; x < this.size; x++) {
-            for (y = 0; y < this.size; y++) {
-                color = 1000 * this.density[this.ix(x,y)];
-                ctx.fillStyle = "rgb("+ color + "," + color + "," + color +")";
-                ctx.fillRect(x * this.scale,y * this.scale, this.scale, this.scale);
-            }   
-        }
-    }
-
-    drawH(ctx) {
-        let x, y, color;
-        for (x = 0; x < this.size; x++) {
-            for (y = 0; y < this.size; y++) {
-                color = 100 * new Vector(this.vx[this.ix(x,y)], this.vy[this.ix(x,y)]).magnitude();
-                if (color > 2) {
-                    ctx.fillStyle = "rgb("+ color*5 + "," + color * 2 + "," + color +")";
-                    ctx.fillRect(x * this.scale,y * this.scale, this.scale, this.scale);
-                }
-            }   
-        }
-    }
-
     drawFire(ctx) {
         let x, y, r, g, b, v, d;
         for (x = 0; x < this.size; x++) {
@@ -68,20 +44,6 @@ class Environment {
                 }
                 if (r > 2 || g > 2 || b > 2) {
                     ctx.fillStyle = "rgb("+ r + "," + g + "," + b +")";
-                    ctx.fillRect(x * this.scale, y * this.scale, this.scale, this.scale);
-                }
-            }   
-        }
-    }
-
-    drawAll(ctx) {
-        let x, y, color, g;
-        for (x = 0; x < this.size; x++) {
-            for (y = 0; y < this.size; y++) {
-                color = 100 * new Vector(this.vx[this.ix(x,y)], this.vy[this.ix(x,y)]).magnitude();
-                g = 100 * this.density[this.ix(x,y)];
-                if (color > 2 || g > 2) {
-                    ctx.fillStyle = "rgb("+ color + "," + g + "," + color +")";
                     ctx.fillRect(x * this.scale, y * this.scale, this.scale, this.scale);
                 }
             }   
@@ -134,9 +96,12 @@ class Environment {
     }
 
     update(dt) {
-        this.vx0 = [...this.vx];
-        this.vy0 = [...this.vy];
-        this.s = [...this.density];
+        // this.vx0 = [...this.vx];
+        // this.vy0 = [...this.vy];
+        // this.s = [...this.density];
+        this.diffuse(this.vx0, this.vx, this.visc, dt);
+        this.diffuse(this.vy0, this.vy, this.visc, dt);
+        this.diffuse(this.s, this.density, this.diff, dt);
         // Got rid of diffusion for a significant performance boost 
 
         this.project(this.vx0, this.vy0, this.vx, this.vy, this.velBounce);
@@ -164,16 +129,33 @@ class Environment {
         return ret;
     }
     
+    diffuse(x, x0, diff, dt) {
+        let a = dt * diff * (this.size - 2) * (this.size - 2);
+        let i, j;
+        for (j = 1; j < this.size - 1; j++) {
+            for (i = 1; i < this.size - 1; i++) {
+                x[this.ix(i,j)] = 
+                    (x0[this.ix(i,j)]
+                    + a * (this.addPos(x, i, j, 1, 0, 1)
+                            + this.addPos(x, i, j, -1, 0, 1)
+                            + this.addPos(x, i, j, 0, 1, 1)
+                            + this.addPos(x, i, j, 0, -1, 1))
+                    ) * 1/(a * 6 + 1);
+            }
+        }
+    }
+
     project(veloX, veloY, p, div, bounce) {
         let j,i;
-        let d1, d2;
+        let d1, d2, d3, d4, d5, d6;
         for (j = 1; j < this.size - 1; j++) {
             for (i = 1; i < this.size - 1; i++) {
                 if (this.wall[this.ix(i,j)] == 0) {
-                    this.walls = 0;
                     d1 = this.addPos(veloX, i, j, 1, 0, bounce) + this.addPos(veloY, i, j, 0, 1, bounce);
-                    this.walls = 0;
                     d2 = -this.addPos(veloX, i, j,-1, 0, bounce)-this.addPos(veloY, i, j, 0, -1, bounce);
+                    d3 = this.addPos(veloY, i, j, 0, 1, bounce)+this.addPos(veloX, i, j, 1, 0, bounce);
+                    d4 = -this.addPos(veloY, i, j, 0, -1, bounce)-this.addPos(veloX, i, j, -1, 0, bounce);
+                    // div[this.ix(i,j)] = -0.25 * (d1 + d2 + d3 + d4);
                     div[this.ix(i,j)] = -0.5 * (d1 + d2);
                     p[this.ix(i,j)] = div[this.ix(i,j)];
                 }
@@ -185,9 +167,19 @@ class Environment {
                 if (this.wall[this.ix(i,j)] == 0) {
                     d1 = this.addPos(p, i, j, 1, 0, bounce);
                     d2 = this.addPos(p, i, j, -1, 0, bounce);
+                    d3 = this.addPos(p, i, j, 1, 1, bounce);
+                    d4 = this.addPos(p, i, j, -1, -1, bounce);
+                    d5 = this.addPos(p, i, j, 1, -1, bounce);
+                    d6 = this.addPos(p, i, j, -1, 1, bounce);
+                    // veloX[this.ix(i,j)] -= (d1 - d2 + (d3 - d4 + d5 - d6) * 0.4) * 0.4;
                     veloX[this.ix(i,j)] -= 0.5 * (d1 - d2);
                     d1 = this.addPos(p, i, j, 0, 1, bounce);
                     d2 = this.addPos(p, i, j, 0, -1, bounce);
+                    d3 = this.addPos(p, i, j, 1, 1, bounce);
+                    d4 = this.addPos(p, i, j, -1, -1, bounce);
+                    d5 = this.addPos(p, i, j, 1, -1, bounce);
+                    d6 = this.addPos(p, i, j, -1, 1, bounce);
+                    // veloY[this.ix(i,j)] -= (d1 - d2 + (d3 - d4 + d5 - d6) * 0.4) * 0.4;
                     veloY[this.ix(i,j)] -= 0.5 * (d1 - d2);
                 }
             }
