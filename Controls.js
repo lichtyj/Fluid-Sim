@@ -72,8 +72,6 @@ class Controls {
 
     mouseButton(e, pressed) {
         if (pressed) {
-            this.mouseX = (game.view.x + (game.view.width + e.layerX - 512)/2) | 0;
-            this.mouseY = (game.view.y + (game.view.height + e.layerY - 512)/2) | 0;
             if (this.keys.indexOf("lmb") == -1) this.keys.push("lmb");
         } else {
             this.keyUp("lmb");
@@ -83,8 +81,8 @@ class Controls {
     mouseMove(e) {
         this.mouseLastX = this.mouseX;
         this.mouseLastY = this.mouseY;
-        this.mouseX = (2*game.view.x + e.layerX) | 0;
-        this.mouseY = (2*game.view.y + e.layerY) | 0;
+        this.mouseX = (5*game.view.x + e.layerX + 512)/5 | 0; // 5 == css scaling
+        this.mouseY = (5*game.view.y + e.layerY + 512)/5 | 0; // 512 == css translation
     }
 
     mouseWheel(y) {
@@ -114,6 +112,15 @@ class Controls {
         var moving = Vector.zero();
         for (var key of this.keys) {
             switch(key) {
+                case 49:
+                    Emitter.create(new Vector(this.mouseX, this.mouseY), 255, 0, 0, 0, 0, -1, 0);
+                    break;
+                case 50:
+                    Emitter.create(new Vector(this.mouseX, this.mouseY), 0, 255, 0, 0, 0, -1, 0);
+                    break;
+                case 51:
+                    Emitter.create(new Vector(this.mouseX, this.mouseY), 0, 0, 255, 0, 0, -1, 0);
+                    break;
                 case 65: case 37: // A
                     moving.add(Vector.left().mult(0.75));
                     break;
@@ -133,7 +140,7 @@ class Controls {
                     this.keyUp(key);
                     break;
                 case 80: // P
-                    game.pause();
+                    game.environment.sendMessage("print");
                     this.keyUp(key);
                     break;
                 case 81: // Q
@@ -167,7 +174,7 @@ class Controls {
                 case "lmb":
                     game.player.shoot(new Vector(this.mouseX, this.mouseY));
                     this.keyUp(key);
-                    // console.log(this.mouseX + ", " + this.mouseY);
+                    console.log(this.mouseX + ", " + this.mouseY);
                     break;
             }
         }

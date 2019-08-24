@@ -34,7 +34,7 @@ class Entity {
     checkCollisions() {
 
         // Down
-        for (var x = 1; x < this.width; x++) {
+        for (var x = 0; x < this.width; x++) {
             for (var y = 0; y < this.velocity.y; y++) {
                 if (game.environment.isWall(this.position.x - this.width/2 + x, this.position.y+this.height/2+y) > (this.isDropping)? 1 : 0) {
                     if (this.velocity.y > 2) {
@@ -49,7 +49,7 @@ class Entity {
         }
 
         // Up
-        for (var x = 1; x < this.width; x++) {
+        for (var x = 0; x < this.width; x++) {
             for (var y = 0; y > this.velocity.y; y--) {
                 if (game.environment.isWall(this.position.x - this.width/2 + x - 1, this.position.y-this.height/2+y) === 2) {
                     this.onImpact(this.position.clone(), this.velocity.clone());

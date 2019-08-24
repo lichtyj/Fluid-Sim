@@ -12,7 +12,7 @@ class Projectile extends Entity {
     }
 
     onImpact(position, velocity) {
-        Explosion.create(this.position.clone(), this.velocity.clone().mult(-1), 3);
+        Explosion.create(position, velocity.mult(-1), 3);
         this.destroy();
     }
 

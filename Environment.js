@@ -29,7 +29,7 @@ class Environment {
                 this.worker.postMessage([cmd, args[0], args[1]]);
                 break;
             case "addDensity":
-                this.worker.postMessage([cmd, args[0], args[1], args[2]]);
+                this.worker.postMessage([cmd, args[0], args[1], args[2], args[3], args[4]]);
                 break;
             case "addVelocity":
                 this.worker.postMessage([cmd, args[0], args[1], args[2], args[3]]);
@@ -40,6 +40,9 @@ class Environment {
             case "draw":
                 this.worker.postMessage([cmd]);
                 break;
+            case "print":
+                this.worker.postMessage([cmd]);
+                break;
         }
     }
 
@@ -47,16 +50,34 @@ class Environment {
         this.sendMessage("worldToGrid", [x, y]);
     }
 
-    addDensity(x, y, amount) {
-        this.sendMessage("addDensity", [x, y, amount]);
+    addDensityArea(x, y, r, g, b, area) {
+        var i, j;
+        for (i = -area; i < area; i++) {
+            for (j = -area; j < area; j++) {
+                this.addDensity(x + i,y + j,r,g,b);
+            }
+        }
     }
 
-    addVelocity(x, y, amountX, amountY) {
-        if (amountX instanceof(Vector)) {
-            amountY = amountX.y;
-            amountX = amountX.x;
+    addDensity(x, y, r, g, b) {
+        this.sendMessage("addDensity", [x, y, r, g, b]);
+    }
+
+    addVelocityArea(x, y, vx, vy, area) {
+        var i, j;
+        for (i = -area; i < area; i++) {
+            for (j = -area; j < area; j++) {
+                this.addVelocity(x + i, y + j, vx, vy);
+            }
         }
-        this.sendMessage("addVelocity", [x, y, amountX, amountY]);
+    }
+
+    addVelocity(x, y, vx, vy) {
+        if (vx instanceof(Vector)) {
+            vy = vx.y;
+            vx = vx.x;
+        }
+        this.sendMessage("addVelocity", [x, y, vx, vy]);
     }
 
     // Duplicate functionality, is there a better way? --- >

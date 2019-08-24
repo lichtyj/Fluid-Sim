@@ -10,6 +10,10 @@ class Player extends Entity {
         this.moving = false;
         this.jumping = false;
         this.onFire = false;
+
+        this.red = 100;
+        this.green = 50;
+        this.blue = 10;
     }
 
     static create(position) {
@@ -53,24 +57,17 @@ class Player extends Entity {
     }
 
     shoot(target) {
+        if (target.x < 0) target.x = 0;
+        if (target.x > worldSize - 1) target.x = worldSize - 1;
+        if (target.y < 0) target.y = 0;
+        if (target.y > worldSize - 1) target.y = worldSize - 1;
         var angle = this.position.angleTo(target);
-        var dir = Vector.fromAngle(angle, 10);
-        game.environment.addDensity(this.position.x + dir.x * 0.6, this.position.y - this.height/2 + dir.y * 0.6, 50);
-        game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.4, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.4, dir);
-        // game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.6, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.6, dir);
-        // game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.8, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.8, dir);
-
-        angle += 10;
-        game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.4, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.4, dir);
-        // game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.6, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.6, dir);
-        // game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.8, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.8, dir);
-
-        angle -= 20;
-        game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.4, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.4, dir);
-        // game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.6, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.6, dir);
-        // game.environment.addVelocity(this.position.x + Math.sin(angle) * dir.x * 0.8, this.position.y - this.height/2 + Math.sin(angle) * dir.y * 0.8, dir);
-        // dir.mult(2);
-        Projectile.create(this.position.clone(), dir);
+        var dir = Vector.fromAngle(angle, 5);
+        var vx = dir.x*0.25;
+        var vy = dir.y*0.25;
+        game.environment.addDensityArea(this.position.x + dir.x, this.position.y + dir.y - 4, 255, 100, 25, 2);
+        game.environment.addVelocityArea(this.position.x + dir.x * 0.5, this.position.y + dir.y * 0.5 - 4, vx, vy, 2);
+        Projectile.create(this.position.clone().add(new Vector(0, -4)), dir);
     }
 
     onImpact() {
@@ -96,6 +93,13 @@ class Player extends Entity {
             this.coyoteTime = -1;
         }
 
+        this.red += Math.random()*4 - 2;
+        this.green += Math.random()*4 - 2;
+        this.blue += Math.random()*4 - 2;
+        this.red = this.red % 255;
+        this.green = this.green % 255;
+        this.blue = this.blue % 255;
+
         if (this.onFire) this.fire += 1;
         if (this.fire > 1) {
             var v;
@@ -116,7 +120,7 @@ class Player extends Entity {
                 game.environment.addVelocity(this.position.x + v.x    , this.position.y + this.height/2 + v.y - 4 + 2, v);
                 game.environment.addVelocity(this.position.x + v.x    , this.position.y + this.height/2 + v.y - 4 - 2, v);
                 
-                game.environment.addDensity(this.position.x + v.x, this.position.y + this.height/2 + v.y - 4, this.onFire);
+                game.environment.addDensity(this.position.x + v.x, this.position.y + this.height/2 + v.y - 4, this.onFire*this.red, this.onFire*this.green, this.onFire*this.blue);
             }
             // // v.x *= 2;
             // v.mult(5);
@@ -131,7 +135,7 @@ class Player extends Entity {
     }
 
     draw(ctx) {
-        ctx.fillStyle = (this.isDropping) ? "green" : (this.coyoteTime > 0) ? "red" : this.color;;
+        ctx.fillStyle = (this.isDropping) ? "green" : (this.coyoteTime > 0) ? "red" : this.color;
         // if (this.velocity.magnitude() > 0.75) {
         // ctx.fillStyle = "white";
         var offset = Math.min(this.velocity.y, this.maxSpeed);

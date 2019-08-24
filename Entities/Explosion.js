@@ -27,12 +27,13 @@ class Explosion extends Entity {
         for (var i = 0; i < 8; i++) {
             v = Vector.randomMinMax(1,this.force);
             v.subtract(this.velocity);
+            v.mult(0.25);
             // v.y*=1.5;
             game.environment.addVelocity(this.position.x + v.x, this.position.y + v.y, v);
             game.environment.addVelocity(this.position.x + v.x, this.position.y + v.y, v);
             game.environment.addVelocity(this.position.x + v.x, this.position.y + v.y, v);
             game.environment.addVelocity(this.position.x + v.x, this.position.y + v.y, v);
-            game.environment.addDensity( this.position.x + v.x, this.position.y + v.y, this.force);
+            game.environment.addDensity(this.position.x + v.x, this.position.y + v.y, this.force*200, this.force*100, this.force*50);
         }
         Particle.create((this.position.clone()).add(v), v, Math.random()*this.force + this.force*5);
     }

@@ -22,7 +22,7 @@ class GameEngine {
         // this.environment = new Environment(128, 0.00000000000001, 0.00000000001);
         // this.environment = new Environment(128, 0.00001, 0.00001);
         // this.environment = new Environment(128, 0, 0);
-        this.environment = new Environment(256, 0, 0);
+        this.environment = new Environment(128, 0, 0);
         var canvas = document.getElementById("fluidcanvas");
         canvas.width = viewSize;
         canvas.height = viewSize;
