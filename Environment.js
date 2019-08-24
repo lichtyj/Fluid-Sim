@@ -164,14 +164,15 @@ class Environment {
 /*    
     project(veloX, veloY, p, div, bounce) {
         let j,i;
-        let d1, d2;
+        let d1, d2, d3, d4, d5, d6;
         for (j = 1; j < this.size - 1; j++) {
             for (i = 1; i < this.size - 1; i++) {
                 if (this.wall[this.ix(i,j)] == 0) {
-                    this.walls = 0;
                     d1 = this.addPos(veloX, i, j, 1, 0, bounce) + this.addPos(veloY, i, j, 0, 1, bounce);
-                    this.walls = 0;
                     d2 = -this.addPos(veloX, i, j,-1, 0, bounce)-this.addPos(veloY, i, j, 0, -1, bounce);
+                    d3 = this.addPos(veloY, i, j, 0, 1, bounce)+this.addPos(veloX, i, j, 1, 0, bounce);
+                    d4 = -this.addPos(veloY, i, j, 0, -1, bounce)-this.addPos(veloX, i, j, -1, 0, bounce);
+                    // div[this.ix(i,j)] = -0.25 * (d1 + d2 + d3 + d4);
                     div[this.ix(i,j)] = -0.5 * (d1 + d2);
                     p[this.ix(i,j)] = div[this.ix(i,j)];
                 }
@@ -183,9 +184,19 @@ class Environment {
                 if (this.wall[this.ix(i,j)] == 0) {
                     d1 = this.addPos(p, i, j, 1, 0, bounce);
                     d2 = this.addPos(p, i, j, -1, 0, bounce);
+                    d3 = this.addPos(p, i, j, 1, 1, bounce);
+                    d4 = this.addPos(p, i, j, -1, -1, bounce);
+                    d5 = this.addPos(p, i, j, 1, -1, bounce);
+                    d6 = this.addPos(p, i, j, -1, 1, bounce);
+                    // veloX[this.ix(i,j)] -= (d1 - d2 + (d3 - d4 + d5 - d6) * 0.4) * 0.4;
                     veloX[this.ix(i,j)] -= 0.5 * (d1 - d2);
                     d1 = this.addPos(p, i, j, 0, 1, bounce);
                     d2 = this.addPos(p, i, j, 0, -1, bounce);
+                    d3 = this.addPos(p, i, j, 1, 1, bounce);
+                    d4 = this.addPos(p, i, j, -1, -1, bounce);
+                    d5 = this.addPos(p, i, j, 1, -1, bounce);
+                    d6 = this.addPos(p, i, j, -1, 1, bounce);
+                    // veloY[this.ix(i,j)] -= (d1 - d2 + (d3 - d4 + d5 - d6) * 0.4) * 0.4;
                     veloY[this.ix(i,j)] -= 0.5 * (d1 - d2);
                 }
             }
