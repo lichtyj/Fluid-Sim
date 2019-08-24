@@ -10,6 +10,7 @@
         <script language="javascript" type="text/javascript" src="Launcher.js"></script>
         <script language="javascript" type="text/javascript" src="Entities/Entity.js"></script>
         <script language="javascript" type="text/javascript" src="Levels.js"></script>
+        <script language="javascript" type="text/javascript" src="Entities/Explosion.js"></script>
         <script language="javascript" type="text/javascript" src="Entities/Particle.js"></script>
         <script language="javascript" type="text/javascript" src="Entities/Person.js"></script>
         <script language="javascript" type="text/javascript" src="Entities/Player.js"></script>
@@ -18,15 +19,34 @@
         <script language="javascript" type="text/javascript" src="Environment.js"></script>
         <script language="javascript" type="text/javascript" src="Resources/Resource.js"></script>
         <script language="javascript" type="text/javascript" src="Resources/Tree.js"></script>
+        <script language="javascript" type="text/javascript" src="Worker.js"></script>
+        <script language="javascript" type="text/javascript" src="WorkerRenderer.js"></script>
+        <style>
+            canvas {
+                transform: scale(5);
+                position: absolute;
+                top: 512px;
+                left: 512px;
+                border: solid black 1px;
+            }
+            #viewport {
+                position: relative;
+                float: left;
+                width: 800px;
+                height: 800px;
+            }
+        </style>
     </head>
 
     <body id="body" style="overflow: hidden">
-        <div id="viewport" tabindex="1">
-            <canvas class="can" id="canvas" >
+        <div id="viewport" autoFocus tabindex="1">
+            <canvas id="fluidcanvas" >
                 Your browser does not support the canvas element.
-            </canvas> 
-            <canvas class="can" id="uiCanvas">
+            </canvas>
+            <canvas id="canvas" >
+                Your browser does not support the canvas element.
             </canvas>
         </div>
     </body>
 </html>
+

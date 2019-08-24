@@ -1,12 +1,11 @@
 class GameEngine {
-    constructor(ctx, uiCtx) {
+    constructor(ctx) {
         this.entities = [];
         this.ctx = ctx;
         this.lastFrame = 0;
         this.dt = 0;
         this.step = 1/60;
         this.toRemove = [];
-        this.ui = new GUI(uiCtx);
         this.time = 0;
         this.view = {x: 0, y:0, width: worldSize, height: worldSize};
 
@@ -19,18 +18,18 @@ class GameEngine {
     }
 
     init() {
-        this.ui.pushMessage("BUILDING WORLD...", "#FFF");
-        window.setTimeout(this.gameLoop, 10);
+        window.setTimeout(this.gameLoop, 1000);
         // this.environment = new Environment(128, 0.00000000000001, 0.00000000001);
         // this.environment = new Environment(128, 0.00001, 0.00001);
         // this.environment = new Environment(128, 0, 0);
-        this.environment = new Environment(64, 0, 0);
+        this.environment = new Environment(256, 0, 0);
+        var canvas = document.getElementById("fluidcanvas");
+        canvas.width = viewSize;
+        canvas.height = viewSize;
+        var offscreen = canvas.transferControlToOffscreen();
+        this.environment.sendMessage("init");
+        this.environment.worker.postMessage({canvas: offscreen}, [offscreen]);
         LoadLevel01();
-    }
-
-    start() {
-        this.ui.pushMessage("<P> TO BEGIN", "#FFF");
-        game.ui.draw();
     }
 
     addWall(x,y) {
@@ -50,7 +49,6 @@ class GameEngine {
             game.draw();
         }
         game.lastFrame = current;
-        game.ui.draw();
         window.requestAnimationFrame(game.gameLoop);
     }
 
@@ -79,8 +77,12 @@ class GameEngine {
     }
 
     draw() {
+
+        this.environment.draw();
+
         this.ctx.canvas.width = this.ctx.canvas.width;
-        this.environment.draw(this.ctx);
+        // this.environment.draw(this.ctx);
+        // // this.ctx.drawImage(this.offscreen,0,0);
         this.entities.sort((a,b) => {return (a.constructor.name < b.constructor.name) ? 1: -1})
         for (var i = 0; i < this.entities.length; i++) {
             this.entities[i].draw(this.ctx);

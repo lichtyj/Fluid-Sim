@@ -12,6 +12,10 @@ class Particle extends Entity {
         return obj;
     }
 
+    onImpact() {
+        
+    }
+
     update() {
         super.update();
         if (this.temp <= 0) {

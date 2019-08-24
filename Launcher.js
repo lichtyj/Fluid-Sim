@@ -1,8 +1,8 @@
 var game;
 var assetMgr = new AssetManager();
 var controls = new Controls();
-var worldSize = 128;
-var viewSize = 128;
+var worldSize = 256;
+var viewSize = 256;
 
 var ready = 1;
 
@@ -37,21 +37,14 @@ function start() {
     canvas.width = viewSize;
     canvas.height = viewSize;
     // canvas.style.background = '#3C6';
-    canvas.style.background = '#000';
+    // canvas.style.background = '#000';
     canvas.style.imageRendering = "Pixelated";
     canvas.style.backgroundRepeat = "no-repeat";
-    var ctx = canvas.getContext('2d', { alpha: true });
+    var ctx = canvas.getContext('2d', { alpha: true});
     ctx.imageSmoothingEnabled = false;
 
-    // UI canvas
-    var uiCanvas = document.getElementById("uiCanvas");
-    uiCanvas.width = viewSize;
-    uiCanvas.height = viewSize;
-    uiCanvas.style.imageRendering = "Pixelated";
-    var uiCtx = uiCanvas.getContext('2d', { alpha: true });
-    uiCtx.imageSmoothingEnabled = false;
 
-    game = new GameEngine(ctx, uiCtx);
+    game = new GameEngine(ctx);
     game.init();
     controls.init();
 }

@@ -65,15 +65,15 @@ class Controls {
 
     keyDown(num) {
         if (this.keys.indexOf(num) == -1 && this.idleKeys.indexOf(num) == -1) {
-            console.log(num);
+            // console.log(num);
             this.keys.push(num);
         }
     }
 
     mouseButton(e, pressed) {
         if (pressed) {
-            // this.mouseX = (game.view.x + (game.view.width + e.layerX - 800)/2) | 0;
-            // this.mouseY = (game.view.y + (game.view.height + e.layerY - 800)/2) | 0;
+            this.mouseX = (game.view.x + (game.view.width + e.layerX - 512)/2) | 0;
+            this.mouseY = (game.view.y + (game.view.height + e.layerY - 512)/2) | 0;
             if (this.keys.indexOf("lmb") == -1) this.keys.push("lmb");
         } else {
             this.keyUp("lmb");
@@ -158,7 +158,6 @@ class Controls {
                     this.keyIdle(key);
                     break;
                 case 118: // F7
-                    // game.save();
                     this.keyUp(key);
                     break;
                 case 120: // F9

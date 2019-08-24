@@ -2,97 +2,67 @@ class Environment {
     constructor(size, diff, visc) {
         this.size = size;
         this.scale = worldSize/size;
-        this.visc = visc
-        this.iterations = 1;
+        this.visc = visc;
         this.diff = diff;
-        this.density = new Array(size*size).fill(0);
-        this.s = new Array(size*size).fill(0);
-        this.vx = new Array(size*size).fill(0);
-        this.vy = new Array(size*size).fill(0);
-        this.vx0 = new Array(size*size).fill(0);
-        this.vy0 = new Array(size*size).fill(0);
         this.wall = new Array(size*size).fill(0);
-        this.velBounce = -1;
-        this.denBounce = 1;
+        // this.iterations = 1;
+        // this.density = new Array(size*size).fill(0);
+        // this.s = new Array(size*size).fill(0);
+        // this.vx = new Array(size*size).fill(0);
+        // this.vy = new Array(size*size).fill(0);
+        // this.vx0 = new Array(size*size).fill(0);
+        // this.vy0 = new Array(size*size).fill(0);
+        // this.velBounce = -1;
+        // this.denBounce = 1;
+
+        this.worker = new Worker('Worker.js');
     }
 
-    draw(ctx) {
-        this.drawFire(ctx);
-    }
-
-    drawD(ctx) {
-        let x, y, color;
-        for (x = 0; x < this.size; x++) {
-            for (y = 0; y < this.size; y++) {
-                color = 1000 * this.density[this.ix(x,y)];
-                ctx.fillStyle = "rgb("+ color + "," + color + "," + color +")";
-                ctx.fillRect(x * this.scale,y * this.scale, this.scale, this.scale);
-            }   
+    sendMessage(cmd, args) {
+        switch (cmd) {
+            case "init":
+                this.worker.postMessage([cmd, worldSize, viewSize, this.size, this.diff, this.visc]);
+                break;
+            case "update":
+                this.worker.postMessage([cmd, args[0]]);
+            case "worldToGrid":
+                this.worker.postMessage([cmd, args[0], args[1]]);
+                break;
+            case "addDensity":
+                this.worker.postMessage([cmd, args[0], args[1], args[2]]);
+                break;
+            case "addVelocity":
+                this.worker.postMessage([cmd, args[0], args[1], args[2], args[3]]);
+                break;
+            case "addWall":
+                this.worker.postMessage([cmd, args[0], args[1], args[2]]);
+                break;
+            case "draw":
+                this.worker.postMessage([cmd]);
+                break;
         }
     }
 
-    drawH(ctx) {
-        let x, y, color;
-        for (x = 0; x < this.size; x++) {
-            for (y = 0; y < this.size; y++) {
-                color = 100 * new Vector(this.vx[this.ix(x,y)], this.vy[this.ix(x,y)]).magnitude();
-                if (color > 2) {
-                    ctx.fillStyle = "rgb("+ color*5 + "," + color * 2 + "," + color +")";
-                    ctx.fillRect(x * this.scale,y * this.scale, this.scale, this.scale);
-                }
-            }   
-        }
+    worldToGrid(x,y) {
+        this.sendMessage("worldToGrid", [x, y]);
     }
 
-    drawFire(ctx) {
-        let x, y, r, g, b, v, d;
-        for (x = 0; x < this.size; x++) {
-            for (y = 0; y < this.size; y++) {
-                if (this.wall[this.ix(x,y)] === 1) {
-                    r = 128;
-                    g = 128;
-                    b = 128;
-                } else if (this.wall[this.ix(x,y)] === 2) {
-                    r = 255;
-                    g = 255;
-                    b = 255;
-                } else {
-                    v = 100 * new Vector(this.vx[this.ix(x,y)], this.vy[this.ix(x,y)]).magnitude();
-                    d = 100 * this.density[this.ix(x,y)];
-                    r = v + d*3;
-                    g = v + d; 
-                    b = v * 1.25;
-                    r = Math.min(255, r);
-                    g = Math.min(255, g);
-                    b = Math.min(255, b);
-                }
-                if (r > 2 || g > 2 || b > 2) {
-                    ctx.fillStyle = "rgb("+ r + "," + g + "," + b +")";
-                    ctx.fillRect(x * this.scale, y * this.scale, this.scale, this.scale);
-                }
-            }   
-        }
+    addDensity(x, y, amount) {
+        this.sendMessage("addDensity", [x, y, amount]);
     }
 
-    drawAll(ctx) {
-        let x, y, color, g;
-        for (x = 0; x < this.size; x++) {
-            for (y = 0; y < this.size; y++) {
-                color = 100 * new Vector(this.vx[this.ix(x,y)], this.vy[this.ix(x,y)]).magnitude();
-                g = 100 * this.density[this.ix(x,y)];
-                if (color > 2 || g > 2) {
-                    ctx.fillStyle = "rgb("+ color + "," + g + "," + color +")";
-                    ctx.fillRect(x * this.scale, y * this.scale, this.scale, this.scale);
-                }
-            }   
+    addVelocity(x, y, amountX, amountY) {
+        if (amountX instanceof(Vector)) {
+            amountY = amountX.y;
+            amountX = amountX.x;
         }
+        this.sendMessage("addVelocity", [x, y, amountX, amountY]);
     }
 
-    getVector({x,y}) {
-        x = (x / this.scale) | 0;
-        y = (y / this.scale) | 0;
-        let index = this.ix(x,y);
-        return new Vector(this.vx[index], this.vy[index]);
+    // Duplicate functionality, is there a better way? --- >
+    addWall(x,y, type) {
+        this.wall[this.worldToGrid(x,y)] = type;
+        this.sendMessage("addWall", [x, y, type]);
     }
 
     ix(x,y) {
@@ -105,65 +75,93 @@ class Environment {
         return this.ix(x,y);
     }
 
-    addDensity(x, y, amount) {
-        this.density[this.worldToGrid(x,y)] += amount;
-    }
-
-    addVelocity(x, y, amountX, amountY) {
-        if (amountX instanceof(Vector)) {
-            amountY = amountX.y;
-            amountX = amountX.x;
-        }
-        let index = this.worldToGrid(x,y);
-        this.vx[index] += amountX;
-        this.vy[index] += amountY;
-    }
-
     isWall(x,y) {
         return this.wall[this.worldToGrid(x,y)];
     }
+    // < --- Duplicate functionality, is there a better way?
 
-    addWall(x,y, type) {
-        this.wall[this.worldToGrid(x,y)] = type;
-        this.density[this.worldToGrid(x,y)] = 0;
-        this.s[this.worldToGrid(x,y)] = 0;
-        this.vx[this.worldToGrid(x,y)] = 0;
-        this.vy[this.worldToGrid(x,y)] = 0;
-        this.vx0[this.worldToGrid(x,y)] = 0;
-        this.vy0[this.worldToGrid(x,y)] = 0;
+
+
+
+    draw(ctx) {
+        // this.sendMessage("draw");
+        // let x, y, r, g, b;
+        // for (x = 0; x < this.size; x++) {
+        //     for (y = 0; y < this.size; y++) {
+        //         if (this.wall[this.ix(x,y)] === 1) {
+        //             r = 128;
+        //             g = 128;
+        //             b = 128;
+        //         } else if (this.wall[this.ix(x,y)] === 2) {
+        //             r = 255;
+        //             g = 255;
+        //             b = 255;
+        //         } else {
+        //             r = 0;
+        //             g = 0;
+        //             b = 0;
+        //         }
+        //         if (r > 2 || g > 2 || b > 2) {
+        //             ctx.fillStyle = "rgb("+ r + "," + g + "," + b +")";
+        //             ctx.fillRect(x * this.scale, y * this.scale, this.scale, this.scale);
+        //         }
+        //     }
+        // }
+
+
+        // let x, y, r, g, b, v, d;
+        // for (x = 0; x < this.size; x++) {
+        //     for (y = 0; y < this.size; y++) {
+        //         if (this.wall[this.ix(x,y)] === 1) {
+        //             r = 128;
+        //             g = 128;
+        //             b = 128;
+        //         } else if (this.wall[this.ix(x,y)] === 2) {
+        //             r = 255;
+        //             g = 255;
+        //             b = 255;
+        //         } else {
+        //             v = 100 * new Vector(this.vx[this.ix(x,y)], this.vy[this.ix(x,y)]).magnitude();
+        //             d = 100 * this.density[this.ix(x,y)];
+        //             r = v + d*3;
+        //             g = v + d; 
+        //             b = v * 1.25;
+        //             r = Math.min(255, r);
+        //             g = Math.min(255, g);
+        //             b = Math.min(255, b);
+        //         }
+        //         if (r > 2 || g > 2 || b > 2) {
+        //             ctx.fillStyle = "rgb("+ r + "," + g + "," + b +")";
+        //             ctx.fillRect(x * this.scale, y * this.scale, this.scale, this.scale);
+        //         }
+        //     }   
+        // }
     }
+
+    // getVector({x,y}) {
+    //     x = (x / this.scale) | 0;
+    //     y = (y / this.scale) | 0;
+    //     let index = this.ix(x,y);
+    //     return new Vector(this.vx[index], this.vy[index]);
+    // }
+
 
     update(dt) {
-        this.vx0 = [...this.vx];
-        this.vy0 = [...this.vy];
-        this.s = [...this.density];
+        // this.sendMessage("update", [dt]);
+        // this.vx0 = [...this.vx];
+        // this.vy0 = [...this.vy];
+        // this.s = [...this.density];
         // Got rid of diffusion for a significant performance boost 
 
-        this.project(this.vx0, this.vy0, this.vx, this.vy, this.velBounce);
+        // this.project(this.vx0, this.vy0, this.vx, this.vy, this.velBounce);
         
-        this.advect(this.vx, this.vx0, this.vx0, this.vy0, dt, 0.9999, this.velBounce);    
-        this.advect(this.vy, this.vy0, this.vx0, this.vy0, dt, 0.9999, this.velBounce);
+        // this.advect(this.vx, this.vx0, this.vx0, this.vy0, dt, 0.9999, this.velBounce);    
+        // this.advect(this.vy, this.vy0, this.vx0, this.vy0, dt, 0.9999, this.velBounce);
         
-        this.project(this.vx, this.vy, this.vx0, this.vy0, this.velBounce);
-        this.advect(this.density, this.s, this.vx, this.vy, dt, 0.965, this.denBounce);
+        // this.project(this.vx, this.vy, this.vx0, this.vy0, this.velBounce);
+        // this.advect(this.density, this.s, this.vx, this.vy, dt, 0.965, this.denBounce);
     }
-
-    addPos(arr, x, y, dx, dy, bounce) {
-        // if (this.wall[this.ix(x+dx, y+dy)] !== 0) this.walls++; 
-        var ret;
-        if (this.wall[this.ix(x+dx, y+dy)] == 0)
-            ret = arr[this.ix(x+dx,y+dy)]
-        else {
-            if (bounce < 0) {
-                bounce *= this.density[this.ix(x,y)];
-            } else {
-                bounce *= new Vector(this.vx[this.ix(x,y)], this.vy[this.ix(x,y)]).magnitude();
-            }
-            ret = bounce*arr[this.ix(x,y)];
-        }
-        return ret;
-    }
-    
+/*    
     project(veloX, veloY, p, div, bounce) {
         let j,i;
         let d1, d2;
@@ -235,14 +233,64 @@ class Environment {
                                 (t0 * d3
                                  + t1 * d4));
                 }
-                // loss * (s0 * (t0 * d0[this.ix(i0, j0)] + t1 * d0[this.ix(i0, j1)])
-                //      +  s1 * (t0 * d0[this.ix(i1, j0)] + t1 * d0[this.ix(i1, j1)]));
-
-                    // loss * (s0 * (t0 * d0[this.ix(i0 | 0, j0 | 0)] + t1 * d0[this.ix(i0 | 0, j1 | 0)])
-                    // + s1 * (t0 * d0[this.ix(i1 | 0, j0 | 0)] + t1 * d0[this.ix(i1 | 0, j1 | 0)]));
             }
         }
     }
+
+    ix(x,y) {
+        return x + y * this.size;
+    }
+
+    worldToGrid(x,y) {
+        x = (x / this.scale) | 0;
+        y = (y / this.scale) | 0;
+        return this.ix(x,y);
+    }
+
+    addPos(arr, x, y, dx, dy, bounce) {
+        // if (this.wall[this.ix(x+dx, y+dy)] !== 0) this.walls++; 
+        var ret;
+        if (this.wall[this.ix(x+dx, y+dy)] == 0)
+            ret = arr[this.ix(x+dx,y+dy)]
+        else {
+            if (bounce < 0) {
+                bounce *= this.density[this.ix(x,y)];
+            } else {
+                bounce *= new Vector(this.vx[this.ix(x,y)], this.vy[this.ix(x,y)]).magnitude();
+            }
+            ret = bounce*arr[this.ix(x,y)];
+        }
+        return ret;
+    }
+
+    addDensity(x, y, amount) {
+        this.density[this.worldToGrid(x,y)] += amount;
+    }
+
+    addVelocity(x, y, amountX, amountY) {
+        if (amountX instanceof(Vector)) {
+            amountY = amountX.y;
+            amountX = amountX.x;
+        }
+        let index = this.worldToGrid(x,y);
+        this.vx[index] += amountX;
+        this.vy[index] += amountY;
+    }
+
+    isWall(x,y) {
+        return this.wall[this.worldToGrid(x,y)];
+    }
+
+    addWall(x,y, type) {
+        this.wall[this.worldToGrid(x,y)] = type;
+        this.density[this.worldToGrid(x,y)] = 0;
+        this.s[this.worldToGrid(x,y)] = 0;
+        this.vx[this.worldToGrid(x,y)] = 0;
+        this.vy[this.worldToGrid(x,y)] = 0;
+        this.vx0[this.worldToGrid(x,y)] = 0;
+        this.vy0[this.worldToGrid(x,y)] = 0;
+    }
+    */
 }
 
 /*
